@@ -113,6 +113,8 @@ if(gz-transport_FOUND)
 		endif()
 	endforeach()
 
+	set(all_posix_gz_make_targets)
+
 	foreach(model ${gz_models})
 
 		# match model to airframe
@@ -141,24 +143,35 @@ if(gz-transport_FOUND)
 			get_filename_component("world_name" ${world} NAME_WE)
 
 			if(world_name STREQUAL "default")
-				add_custom_target(gz_${model}
+				set(_targ_name "gz_${model}")
+				add_custom_target(${_targ_name}
 					COMMAND ${CMAKE_COMMAND} -E env PX4_SIM_MODEL=gz_${model} $<TARGET_FILE:px4>
 					WORKING_DIRECTORY ${SITL_WORKING_DIR}
 					USES_TERMINAL
 					DEPENDS px4
 				)
 			else()
-				add_custom_target(gz_${model}_${world_name}
+				set(_targ_name "gz_${model}_${world_name}")
+				add_custom_target(${_targ_name}
 					COMMAND ${CMAKE_COMMAND} -E env PX4_SIM_MODEL=gz_${model} PX4_GZ_WORLD=${world_name} $<TARGET_FILE:px4>
 					WORKING_DIRECTORY ${SITL_WORKING_DIR}
 					USES_TERMINAL
 					DEPENDS px4
 				)
 			endif()
+			list(APPEND all_posix_gz_make_targets ${_targ_name})
 		endforeach()
 	endforeach()
 
 	# PX4_GZ_MODELS, PX4_GZ_WORLDS, GZ_SIM_RESOURCE_PATH
 	configure_file(gz_env.sh.in ${PX4_BINARY_DIR}/rootfs/gz_env.sh)
+
+	string(REPLACE ";" "," posix_gz_make_targets_list "${all_posix_gz_make_targets}")
+
+	add_custom_target(list_gz_make_targets
+		COMMAND sh -c "printf \"${posix_gz_make_targets_list}\\n\""
+		COMMENT "List of acceptable '${PX4_BOARD}' gz_<model_world> targets:"
+		VERBATIM
+		)
 
 endif()

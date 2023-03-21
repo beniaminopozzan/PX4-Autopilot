@@ -147,6 +147,8 @@ if(gazebo_FOUND)
 		endif()
 	endforeach()
 
+	set(all_posix_gazebo-classic_make_targets)
+
 	foreach(debugger ${debuggers})
 		foreach(model ${models})
 
@@ -223,6 +225,8 @@ if(gazebo_FOUND)
 						DEPENDS px4 sitl_gazebo-classic
 					)
 
+					list(APPEND all_posix_gazebo-classic_make_targets ${_targ_name})
+
 					string(REPLACE "gazebo-classic" "gazebo" _targ_name_compat ${_targ_name})
 					add_custom_target(${_targ_name_compat}
 						COMMAND ${CMAKE_COMMAND} -E cmake_echo_color --red "WARNING ${_targ_name_compat} target DEPRECATED, please use ${_targ_name}"
@@ -237,6 +241,14 @@ if(gazebo_FOUND)
 
 	add_custom_target(gazebo-classic DEPENDS gazebo-classic_iris) # alias
 	add_custom_target(gazebo DEPENDS gazebo-classic_iris) # alias
+
+	string(REPLACE ";" "," posix_gazebo-classic_make_targets_list "${all_posix_gazebo-classic_make_targets}")
+
+	add_custom_target(list_gazebo-classic_make_targets
+		COMMAND sh -c "printf \"${posix_gazebo-classic_make_targets_list}\\n\""
+		COMMENT "List of acceptable '${PX4_BOARD}' gazebo-classic_<model_debugger_world> targets:"
+		VERBATIM
+		)
 
 	# mavsdk tests currently depend on sitl_gazebo
 	ExternalProject_Add(mavsdk_tests
