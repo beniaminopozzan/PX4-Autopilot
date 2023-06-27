@@ -82,7 +82,7 @@ function update_agent_templates {
     "px_generate_uorb_topic_files.py" \
     )
   for file in ${code_generators[@]}; do
-    compare_and_update "$PX4_DIR/msg/tools/$file $ws_dir/src/px4_ros_com/scripts/$file" \
+    compare_and_update "$PX4_DIR/msg/tools/$file" "$ws_dir/src/px4_ros_com/scripts/$file" \
       && echo -e "--\t\t- '$ws_dir/src/px4_ros_com/scripts/$file' updated" && ((code_generator_files_updated+=1))
   done
   if [ $code_generator_files_updated -eq 0 ]; then
